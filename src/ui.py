@@ -155,23 +155,38 @@ with tab3:
             if status_res.status_code == 200:
                 status = status_res.json()
                 
-                # Show last training result if available
-                if status.get("last_training_time"):
-                    st.divider()
-                    st.caption(f"**Last Training:** {status['last_training_time']}")
-                    
-                    if status.get("last_training_result") == "success":
-                        st.success(f"✅ {status.get('last_training_message', 'Training completed successfully')}")
-                    elif status.get("last_training_result") == "error":
-                        st.error(f"❌ {status.get('last_training_message', 'Training failed')}")
-                
                 # Show current status
                 if status.get("is_training"):
-                    st.warning("⏳ Training in progress... Please wait.")
-                    st.info("Refresh this page in a few minutes to see the results.")
-                    if st.button("🔄 Refresh Status"):
+                    st.warning("Training in progress...")
+                    
+                    # Show training logs in real-time
+                    if status.get("training_logs"):
+                        st.subheader("Training Progress:")
+                        log_container = st.container()
+                        with log_container:
+                            for log in status["training_logs"]:
+                                st.text(log)
+                    
+                    if st.button("Refresh Status", key="refresh_training"):
                         st.rerun()
                 else:
+                    # Show last training result if available
+                    if status.get("last_training_time"):
+                        st.divider()
+                        st.caption(f"**Last Training:** {status['last_training_time']}")
+                        
+                        if status.get("last_training_result") == "success":
+                            st.success(f"{status.get('last_training_message', 'Training completed successfully')}")
+                        elif status.get("last_training_result") == "error":
+                            st.error(f"{status.get('last_training_message', 'Training failed')}")
+                        
+                        # Show training logs from last run
+                        if status.get("training_logs"):
+                            with st.expander("View Training Logs"):
+                                for log in status["training_logs"]:
+                                    st.text(log)
+                    
+                    # Start training button
                     if st.button("Start Retraining Process"):
                         try:
                             res = requests.post(f"{API_URL}/retrain")
@@ -180,8 +195,7 @@ with tab3:
                                 st.error(response_data["error"])
                             else:
                                 st.info(response_data['message'])
-                                st.info("⏳ Training started! Click 'Refresh Status' button after a few minutes to see results.")
-                                time.sleep(2)
+                                time.sleep(1)
                                 st.rerun()
                         except Exception as e:
                             st.error(f"Failed to trigger training: {e}")

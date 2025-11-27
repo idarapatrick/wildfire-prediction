@@ -4,7 +4,7 @@ from PIL import Image
 import io
 
 # Configuration
-API_URL = "https://wildfire-prediction.onrender.com/"
+API_URL = https://wildfire-prediction.up.railway.app/"
 
 
 st.set_page_config(page_title="Wildfire Detection System", layout="wide")

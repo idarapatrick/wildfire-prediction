@@ -1,9 +1,20 @@
 import tensorflow as tf
 import os
+import sys
 import shutil
 from datetime import datetime
-from src.preprocessing import load_data
-from src.model import build_model, compile_for_finetuning
+
+# Enable eager execution (required for some TensorFlow operations)
+tf.config.run_functions_eagerly(True)
+
+# Fix imports to work both standalone and when called from main.py
+try:
+    from src.preprocessing import load_data
+    from src.model import build_model, compile_for_finetuning
+except ModuleNotFoundError:
+    # When running directly from src/ directory
+    from preprocessing import load_data
+    from model import build_model, compile_for_finetuning
 
 # Global callback for progress tracking
 progress_callback = None
@@ -108,6 +119,13 @@ def run_training(status_dict=None):
         print(msg)
         model = existing_model
         base_model = get_base_model_from_loaded(model)
+        
+        # Recompile the model with a fresh optimizer to avoid variable mismatch
+        model.compile(
+            loss='binary_crossentropy',
+            optimizer=tf.keras.optimizers.Adam(learning_rate=0.001),
+            metrics=['binary_accuracy']
+        )
     else:
         msg = "No existing model found. Building new model from scratch."
         if status_dict:
@@ -122,15 +140,17 @@ def run_training(status_dict=None):
     print(msg)
     
     callbacks = []
+    verbose_level = 1  # Default to showing progress
     if status_dict:
         callbacks.append(ProgressCallback(status_dict, "Phase 1"))
+        verbose_level = 0  # Suppress default output since we're using callback
     
     history_1 = model.fit(
         train_ds,
         epochs=4,
         validation_data=val_ds,
         callbacks=callbacks,
-        verbose=0  # Suppress default output since we're using callback
+        verbose=verbose_level
     )
 
     # Phase 2 Training (Fine Tuning)
@@ -143,8 +163,10 @@ def run_training(status_dict=None):
     total_epochs = 4 + 7
     
     callbacks = []
+    verbose_level = 1  # Default to showing progress
     if status_dict:
         callbacks.append(ProgressCallback(status_dict, "Phase 2"))
+        verbose_level = 0  # Suppress default output since we're using callback
     
     history_2 = model.fit(
         train_ds,
@@ -152,7 +174,7 @@ def run_training(status_dict=None):
         initial_epoch=history_1.epoch[-1],
         validation_data=val_ds,
         callbacks=callbacks,
-        verbose=0  # Suppress default output since we're using callback
+        verbose=verbose_level
     )
 
     # Evaluate new model

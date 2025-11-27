@@ -43,6 +43,24 @@ def get_status():
         "started_at": START_TIME.isoformat()
     }
 
+@app.get("/debug")
+def debug_info():
+    """
+    Debug endpoint to verify preprocessing version.
+    """
+    import inspect
+    from src.prediction import predict_image
+    
+    # Get the source code of predict_image function
+    source = inspect.getsource(predict_image)
+    has_normalization = "/ 255.0" in source
+    
+    return {
+        "preprocessing_version": "v2_with_normalization" if has_normalization else "v1_without_normalization",
+        "has_divide_by_255": has_normalization,
+        "code_snippet": source[500:800] if len(source) > 500 else source
+    }
+
 @app.get("/data_stats")
 def get_data_stats():
     """

@@ -4,9 +4,6 @@ import sys
 import shutil
 from datetime import datetime
 
-# Enable eager execution (required for some TensorFlow operations)
-tf.config.run_functions_eagerly(True)
-
 # Fix imports to work both standalone and when called from main.py
 try:
     from src.preprocessing import load_data

@@ -208,8 +208,11 @@ async def trigger_retraining(background_tasks: BackgroundTasks):
     
     def training_task():
         global training_status
+        import traceback
         
         try:
+            training_status["training_logs"].append("Initializing training task...")
+            
             # Pass the training_status dict to run_training so it can update logs in real-time
             result = run_training(status_dict=training_status)
             
@@ -217,14 +220,17 @@ async def trigger_retraining(background_tasks: BackgroundTasks):
             training_status["last_training_time"] = datetime.now().isoformat()
             training_status["last_training_result"] = "success"
             training_status["last_training_message"] = result
-            training_status["training_logs"].append(f"\n✅ {result}")
+            training_status["training_logs"].append(f"\n{result}")
             
         except Exception as e:
+            error_trace = traceback.format_exc()
             training_status["is_training"] = False
             training_status["last_training_time"] = datetime.now().isoformat()
             training_status["last_training_result"] = "error"
             training_status["last_training_message"] = f"Training failed: {str(e)}"
-            training_status["training_logs"].append(f"\n❌ Error: {str(e)}")
+            training_status["training_logs"].append(f"\nError: {str(e)}")
+            training_status["training_logs"].append(f"Full traceback:\n{error_trace}")
+            print(f"TRAINING ERROR: {error_trace}")  # Log to server console
     
     background_tasks.add_task(training_task)
     return {"message": "Retraining started in background. Use /training_status to check progress."}

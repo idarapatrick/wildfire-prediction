@@ -4,6 +4,12 @@ def build_model(input_shape=(128, 128, 3)):
     """
     Constructs a MobileNetV2-based model for transfer learning.
     
+    **CUSTOM PRE-TRAINED MODEL:**
+    - Uses MobileNetV2 architecture pre-trained on ImageNet (1000 classes)
+    - Base model is frozen initially to preserve learned features
+    - Custom classification head for wildfire binary classification
+    - This serves as the foundation for incremental retraining
+    
     The base model is initially frozen to train only the top classification layers.
 
     Args:
@@ -15,7 +21,7 @@ def build_model(input_shape=(128, 128, 3)):
             - model (tf.keras.Model): The compiled Keras model.
             - base_model (tf.keras.Model): The MobileNetV2 base (for later fine-tuning).
     """
-    
+
     preprocess_layer = tf.keras.applications.mobilenet_v2.preprocess_input
     
     base_model = tf.keras.applications.MobileNetV2(

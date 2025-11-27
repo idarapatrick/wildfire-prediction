@@ -60,8 +60,8 @@ def run_training(status_dict=None):
         str: A status message indicating success or failure.
     """
     if status_dict:
-        status_dict['training_logs'].append("--- Starting Training Pipeline ---")
-    print("--- Starting Training Pipeline ---")
+        status_dict['training_logs'].append("Starting Training Pipeline")
+    print("Starting Training Pipeline")
     
     # Load Data
     if status_dict:
@@ -116,7 +116,7 @@ def run_training(status_dict=None):
         model, base_model = build_model()
     
     # Phase 1 Training (Transfer Learning)
-    msg = "\n--- Phase 1: Transfer Learning ---"
+    msg = "\nPhase 1: Transfer Learning"
     if status_dict:
         status_dict['training_logs'].append(msg)
     print(msg)
@@ -134,7 +134,7 @@ def run_training(status_dict=None):
     )
 
     # Phase 2 Training (Fine Tuning)
-    msg = "\n--- Phase 2: Fine Tuning ---"
+    msg = "\nPhase 2: Fine Tuning"
     if status_dict:
         status_dict['training_logs'].append(msg)
     print(msg)
@@ -156,7 +156,7 @@ def run_training(status_dict=None):
     )
 
     # Evaluate new model
-    msg = "\n--- Evaluating Retrained Model ---"
+    msg = "\nEvaluating Retrained Model"
     if status_dict:
         status_dict['training_logs'].append(msg)
     print(msg)
@@ -169,7 +169,7 @@ def run_training(status_dict=None):
     # Compare and decide whether to keep new model
     if existing_model_accuracy is not None:
         if new_model_accuracy >= existing_model_accuracy:
-            msg = f"✅ Performance improved! ({existing_model_accuracy:.4f} → {new_model_accuracy:.4f})"
+            msg = f"Performance improved! ({existing_model_accuracy:.4f} → {new_model_accuracy:.4f})"
             if status_dict:
                 status_dict['training_logs'].append(msg)
             print(msg)
@@ -180,7 +180,7 @@ def run_training(status_dict=None):
             model.save(MODEL_SAVE_PATH)
             return f"Training Completed Successfully. Accuracy improved from {existing_model_accuracy:.2%} to {new_model_accuracy:.2%}"
         else:
-            msg = f"⚠️ Performance decreased ({existing_model_accuracy:.4f} → {new_model_accuracy:.4f})"
+            msg = f"Performance decreased ({existing_model_accuracy:.4f} → {new_model_accuracy:.4f})"
             if status_dict:
                 status_dict['training_logs'].append(msg)
             print(msg)

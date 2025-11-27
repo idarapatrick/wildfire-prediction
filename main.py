@@ -70,6 +70,50 @@ def debug_info():
         "code_snippet": source[500:800] if len(source) > 500 else source
     }
 
+@app.get("/test_prediction")
+def test_prediction():
+    """
+    Test prediction with a sample training image to verify preprocessing.
+    """
+    import numpy as np
+    from src.prediction import load_model_instance
+    
+    # Create a test image: white pixels (max value)
+    test_img_array = np.ones((1, 128, 128, 3)) * 255.0
+    test_img_normalized = test_img_array / 255.0
+    
+    model = load_model_instance()
+    
+    # Test with both preprocessing methods
+    pred_raw = model.predict(test_img_array, verbose=0)[0][0]
+    pred_normalized = model.predict(test_img_normalized, verbose=0)[0][0]
+    
+    # Also test with an actual wildfire image if available
+    wildfire_test = None
+    wildfire_path = os.path.join(TRAIN_WILDFIRE_DIR)
+    if os.path.exists(wildfire_path):
+        wildfire_files = [f for f in os.listdir(wildfire_path) if f.endswith('.jpg')]
+        if wildfire_files:
+            import tensorflow as tf
+            test_file = os.path.join(wildfire_path, wildfire_files[0])
+            img = tf.keras.utils.load_img(test_file, target_size=(128, 128))
+            img_array = tf.keras.utils.img_to_array(img)
+            img_normalized = np.expand_dims(img_array / 255.0, 0)
+            wildfire_test = {
+                "file": wildfire_files[0],
+                "prediction_score": float(model.predict(img_normalized, verbose=0)[0][0]),
+                "predicted_as": "WILDFIRE" if model.predict(img_normalized, verbose=0)[0][0] > 0.5 else "NO WILDFIRE"
+            }
+    
+    return {
+        "white_image_test": {
+            "raw_255_score": float(pred_raw),
+            "normalized_01_score": float(pred_normalized)
+        },
+        "actual_wildfire_image": wildfire_test,
+        "interpretation": "Normalized (0-1) preprocessing should give higher scores for wildfire images"
+    }
+
 @app.get("/data_stats")
 def get_data_stats():
     """

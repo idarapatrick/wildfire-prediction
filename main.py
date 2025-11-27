@@ -3,17 +3,17 @@ from typing import List
 import shutil
 import os
 import time
-from datetime import datetime, timedelta
+from datetime import datetime
+
 from src.prediction import predict_image
 from src.train_pipeline import run_training
 
 app = FastAPI(title="Wildfire Prediction API")
 
-# Global variable to track start time for Uptime requirement
 START_TIME = datetime.now()
 
-# Paths
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TRAIN_WILDFIRE_DIR = os.path.join(BASE_DIR, 'data', 'train', 'wildfire')
 TRAIN_NOWILDFIRE_DIR = os.path.join(BASE_DIR, 'data', 'train', 'nowildfire')
 

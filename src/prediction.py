@@ -43,24 +43,25 @@ def predict_image(image_file):
     """
     model = load_model_instance()
 
-    # Load the image using Keras utilities
-    img = tf.keras.utils.load_img(
-        image_file, 
-        target_size=IMG_SIZE
-    )
+    # Load image - this returns PIL Image in RGB mode
+    img = tf.keras.utils.load_img(image_file, target_size=IMG_SIZE)
     
-    # Convert to array and create a batch (1, 128, 128, 3)
+    # Convert PIL Image to numpy array [0-255]
     img_array = tf.keras.utils.img_to_array(img)
     
-    # IMPORTANT: The model was trained with normalized data (0-1 range)
-    # even though it has MobileNet preprocessing layer.
-    # We must match the training preprocessing exactly.
+    print(f"Debug - Loaded image shape: {img_array.shape}, dtype: {img_array.dtype}")
+    print(f"Debug - Pixel range: min={img_array.min():.2f}, max={img_array.max():.2f}, mean={img_array.mean():.2f}")
+    
+    # Normalize to [0, 1] to match training (notebook divided by 255)
     img_array = img_array / 255.0
     
-    img_array = tf.expand_dims(img_array, 0) 
+    # Add batch dimension
+    img_array = np.expand_dims(img_array, axis=0)
+    
+    print(f"Debug - After preprocessing shape: {img_array.shape}, range: [{img_array.min():.6f}, {img_array.max():.6f}]")
 
     # Predict
-    prediction_score = model.predict(img_array)[0][0]
+    prediction_score = model.predict(img_array, verbose=0)[0][0]
     
     # Interpret Result (Sigmoid output: 0 to 1)
     # Class mapping: 0=nowildfire, 1=wildfire (alphabetical order)
@@ -71,7 +72,7 @@ def predict_image(image_file):
         result = "No Wildfire"
         confidence = 1.0 - float(prediction_score)
     
-    print(f"Debug - Raw score: {prediction_score}, Prediction: {result}, Confidence: {confidence}")
+    print(f"Debug - Raw score: {prediction_score:.6f}, Prediction: {result}, Confidence: {confidence:.4f}")
         
     return {
         "prediction": result,

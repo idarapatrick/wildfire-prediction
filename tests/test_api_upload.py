@@ -17,7 +17,7 @@ if wildfire_files:
     
     print(f"Testing with wildfire image: {wildfire_files[0]}")
     print(f"API URL: {API_URL}")
-    print("-" * 60)
+
     
     # Upload the file
     with open(test_image, 'rb') as f:
@@ -29,16 +29,14 @@ if wildfire_files:
     
     if response.status_code == 200:
         result = response.json()
-        print("\n" + "=" * 60)
         print(f"PREDICTION: {result['prediction']}")
         print(f"CONFIDENCE: {result['confidence']}%")
         print(f"RAW SCORE: {result['raw_score']}")
-        print("=" * 60)
         
         if result['prediction'] == "Wildfire Detected":
-            print("✅ CORRECT - Wildfire image detected as wildfire")
+            print("CORRECT - Wildfire image detected as wildfire")
         else:
-            print("❌ WRONG - Wildfire image detected as no wildfire")
+            print("WRONG - Wildfire image detected as no wildfire")
 else:
     print("No wildfire images found in training data")
 
@@ -50,8 +48,7 @@ if nowildfire_files:
     test_image = os.path.join(nowildfire_dir, nowildfire_files[0])
     
     print(f"\nTesting with nowildfire image: {nowildfire_files[0]}")
-    print("-" * 60)
-    
+
     with open(test_image, 'rb') as f:
         files = {'file': (nowildfire_files[0], f, 'image/jpeg')}
         response = requests.post(API_URL, files=files)
@@ -61,13 +58,11 @@ if nowildfire_files:
     
     if response.status_code == 200:
         result = response.json()
-        print("\n" + "=" * 60)
         print(f"PREDICTION: {result['prediction']}")
         print(f"CONFIDENCE: {result['confidence']}%")
         print(f"RAW SCORE: {result['raw_score']}")
-        print("=" * 60)
         
         if result['prediction'] == "No Wildfire":
-            print("✅ CORRECT - No wildfire image detected as no wildfire")
+            print("CORRECT - No wildfire image detected as no wildfire")
         else:
-            print("❌ WRONG - No wildfire image detected as wildfire")
+            print("WRONG - No wildfire image detected as wildfire")

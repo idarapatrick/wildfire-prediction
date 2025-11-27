@@ -19,16 +19,15 @@ test_img_01 = np.ones((1, 128, 128, 3)) * 1.0      # [0-1] range
 pred_255 = model.predict(test_img_255, verbose=0)[0][0]
 pred_01 = model.predict(test_img_01, verbose=0)[0][0]
 
-print("\n" + "="*60)
+
 print("MODEL PREPROCESSING TEST RESULTS")
-print("="*60)
 print(f"\nInput: White image (all pixels = max value)")
 print(f"  - With [0-255] range: Prediction = {pred_255:.6f}")
 print(f"  - With [0-1] range:   Prediction = {pred_01:.6f}")
 
 print("\n" + "="*60)
 print("INTERPRETATION:")
-print("="*60)
+
 
 # Test with a sample wildfire and nowildfire image
 train_wildfire_dir = os.path.join('data', 'train', 'wildfire')
@@ -44,7 +43,7 @@ if os.path.exists(train_wildfire_dir) and os.path.exists(train_nowildfire_dir):
         nowildfire_path = os.path.join(train_nowildfire_dir, nowildfire_files[0])
         
         print("\nTesting with ACTUAL training images:")
-        print("-" * 60)
+      
         
         for test_path, label in [(wildfire_path, "WILDFIRE"), (nowildfire_path, "NO WILDFIRE")]:
             img = tf.keras.utils.load_img(test_path, target_size=(128, 128))
@@ -63,9 +62,7 @@ if os.path.exists(train_wildfire_dir) and os.path.exists(train_nowildfire_dir):
             print(f"  Using [0-1] preprocessing:   score = {pred_01:.4f}")
             print(f"    -> Predicted as: {'WILDFIRE' if pred_01 > 0.5 else 'NO WILDFIRE'}")
 
-print("\n" + "="*60)
 print("CONCLUSION:")
-print("="*60)
+
 print("The correct preprocessing method is the one that predicts")
 print("wildfire images with scores > 0.5 and nowildfire images < 0.5")
-print("="*60)

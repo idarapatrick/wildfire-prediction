@@ -12,6 +12,14 @@ app = FastAPI(title="Wildfire Prediction API")
 
 START_TIME = datetime.now()
 
+# Training status tracker
+training_status = {
+    "is_training": False,
+    "last_training_time": None,
+    "last_training_result": None,
+    "last_training_message": None
+}
+
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 TRAIN_WILDFIRE_DIR = os.path.join(BASE_DIR, 'data', 'train', 'wildfire')
@@ -185,7 +193,41 @@ async def upload_training_data(
 async def trigger_retraining(background_tasks: BackgroundTasks):
     """
     Endpoint to trigger the model retraining pipeline.
-    Runs in background.
+    Runs in background and updates training status.
     """
-    background_tasks.add_task(run_training)
-    return {"message": "Retraining started in background. The model will update automatically upon completion."}
+    global training_status
+    
+    if training_status["is_training"]:
+        return {"error": "Training already in progress. Please wait for it to complete."}
+    
+    training_status["is_training"] = True
+    training_status["last_training_result"] = None
+    training_status["last_training_message"] = "Training in progress..."
+    
+    def training_task():
+        global training_status
+        try:
+            result = run_training()
+            training_status["is_training"] = False
+            training_status["last_training_time"] = datetime.now().isoformat()
+            training_status["last_training_result"] = "success"
+            training_status["last_training_message"] = result
+        except Exception as e:
+            training_status["is_training"] = False
+            training_status["last_training_time"] = datetime.now().isoformat()
+            training_status["last_training_result"] = "error"
+            training_status["last_training_message"] = f"Training failed: {str(e)}"
+    
+    background_tasks.add_task(training_task)
+    return {"message": "Retraining started in background. Use /training_status to check progress."}
+
+@app.get("/training_status")
+def get_training_status():
+    """
+    Get the current status of model training.
+    
+    Returns:
+        dict: Training status information including whether training is in progress,
+              last training time, result, and detailed message.
+    """
+    return training_status

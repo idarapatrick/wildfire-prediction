@@ -1,7 +1,7 @@
 from locust import HttpUser, task, between
 
 class WildfireUser(HttpUser):
-    wait_time = between(1, 3)
+    wait_time = between(1, 3) # Users wait 1-3 seconds between actions
 
     @task
     def predict_image(self):

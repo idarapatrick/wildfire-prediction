@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 from PIL import Image
 import io
+import time
 
 # Configuration
 API_URL = "https://wildfire-prediction.up.railway.app"
@@ -148,10 +149,41 @@ with tab3:
         st.subheader("Trigger Retraining")
         st.write("This will use all available data (old + new) to update the model.")
         
-        if st.button("Start Retraining Process"):
-            try:
-                res = requests.post(f"{API_URL}/retrain")
-                st.info(res.json()['message'])
-                st.caption("Check your terminal/console for training progress logs.")
-            except:
-                st.error("Failed to trigger training.")
+        # Check current training status
+        try:
+            status_res = requests.get(f"{API_URL}/training_status")
+            if status_res.status_code == 200:
+                status = status_res.json()
+                
+                # Show last training result if available
+                if status.get("last_training_time"):
+                    st.divider()
+                    st.caption(f"**Last Training:** {status['last_training_time']}")
+                    
+                    if status.get("last_training_result") == "success":
+                        st.success(f"✅ {status.get('last_training_message', 'Training completed successfully')}")
+                    elif status.get("last_training_result") == "error":
+                        st.error(f"❌ {status.get('last_training_message', 'Training failed')}")
+                
+                # Show current status
+                if status.get("is_training"):
+                    st.warning("⏳ Training in progress... Please wait.")
+                    st.info("Refresh this page in a few minutes to see the results.")
+                    if st.button("🔄 Refresh Status"):
+                        st.rerun()
+                else:
+                    if st.button("Start Retraining Process"):
+                        try:
+                            res = requests.post(f"{API_URL}/retrain")
+                            response_data = res.json()
+                            if "error" in response_data:
+                                st.error(response_data["error"])
+                            else:
+                                st.info(response_data['message'])
+                                st.info("⏳ Training started! Click 'Refresh Status' button after a few minutes to see results.")
+                                time.sleep(2)
+                                st.rerun()
+                        except Exception as e:
+                            st.error(f"Failed to trigger training: {e}")
+        except Exception as e:
+            st.error(f"Could not fetch training status: {e}")

@@ -16,5 +16,5 @@ COPY . .
 # Expose the port FastAPI runs on
 EXPOSE 8000
 
-# Command to run the API
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Use this exact line (no brackets, no quotes around the whole line)
+CMD uvicorn src.main:app --host 0.0.0.0 --port $PORT

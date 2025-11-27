@@ -40,8 +40,11 @@ with tab1:
         if st.button("Analyze Image"):
             with st.spinner("Analyzing..."):
                 try:
-                    # Send to API
-                    files = {"file": uploaded_file.getvalue()}
+                    # Reset file pointer to beginning
+                    uploaded_file.seek(0)
+                    
+                    # Send to API with proper file format
+                    files = {"file": (uploaded_file.name, uploaded_file.getvalue(), uploaded_file.type)}
                     response = requests.post(f"{API_URL}/predict", files=files)
                     
                     if response.status_code == 200:

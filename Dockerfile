@@ -17,4 +17,4 @@ COPY . .
 EXPOSE 8000
 
 # Use this exact line (no brackets, no quotes around the whole line)
-CMD uvicorn src.main:app --host 0.0.0.0 --port $PORT
+CMD ["sh", "-c", "uvicorn src.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

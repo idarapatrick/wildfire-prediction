@@ -4,12 +4,11 @@ from PIL import Image
 import io
 
 # Configuration
-API_URL = "http://127.0.0.1:8000"
+API_URL = "https://wildfire-prediction.onrender.com/"
 
 st.set_page_config(page_title="Wildfire Detection System", layout="wide")
 
-st.title("🛰️ Satellite Wildfire Detection System")
-st.markdown("---")
+st.title("Satellite Wildfire Detection System")
 
 # Sidebar for System Status
 st.sidebar.header("System Status")
@@ -25,9 +24,9 @@ except:
     st.sidebar.error("Could not connect to API")
 
 # Tabs for different functionalities
-tab1, tab2, tab3 = st.tabs(["🔮 Prediction", "📊 Data Insights", "⚙️ Retraining Pipeline"])
+tab1, tab2, tab3 = st.tabs(["Prediction", "Data Insights", "Retraining Pipeline"])
 
-# --- TAB 1: PREDICTION ---
+
 with tab1:
     st.header("Real-time Prediction")
     uploaded_file = st.file_uploader("Upload a satellite image...", type=["jpg", "png", "jpeg"])
@@ -50,15 +49,15 @@ with tab1:
                         conf = result['confidence']
                         
                         if pred == "Wildfire Detected":
-                            st.error(f"🚨 {pred} ({conf}%)")
+                            st.error(f"{pred} ({conf}%)")
                         else:
-                            st.success(f"✅ {pred} ({conf}%)")
+                            st.success(f"{pred} ({conf}%)")
                     else:
                         st.error("Error from API")
                 except Exception as e:
                     st.error(f"Connection Error: {e}")
 
-# --- TAB 2: VISUALIZATIONS ---
+
 with tab2:
     st.header("Dataset Visualization & Interpretation")
     st.write("Interpretations of features in the current training dataset.")
@@ -90,7 +89,7 @@ with tab2:
         except:
             st.error("API Connection Failed")
 
-# --- TAB 3: RETRAINING ---
+
 with tab3:
     st.header("Model Retraining Pipeline")
     

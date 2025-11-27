@@ -51,20 +51,25 @@ def predict_image(image_file):
     
     # Convert to array and create a batch (1, 128, 128, 3)
     img_array = tf.keras.utils.img_to_array(img)
+    
+    # IMPORTANT: The model was trained with normalized data (0-1 range)
+    # even though it has MobileNet preprocessing layer.
+    # We must match the training preprocessing exactly.
+    img_array = img_array / 255.0
+    
     img_array = tf.expand_dims(img_array, 0) 
 
     # Predict
     prediction_score = model.predict(img_array)[0][0]
     
     # Interpret Result (Sigmoid output: 0 to 1)
-    # NOTE: Labels appear to be inverted - fixing interpretation
-    # Score close to 0 = wildfire, score close to 1 = nowildfire
-    if prediction_score < 0.5:
+    # Class mapping: 0=nowildfire, 1=wildfire (alphabetical order)
+    if prediction_score > 0.5:
         result = "Wildfire Detected"
-        confidence = 1.0 - float(prediction_score)
+        confidence = float(prediction_score)
     else:
         result = "No Wildfire"
-        confidence = float(prediction_score)
+        confidence = 1.0 - float(prediction_score)
     
     print(f"Debug - Raw score: {prediction_score}, Prediction: {result}, Confidence: {confidence}")
         

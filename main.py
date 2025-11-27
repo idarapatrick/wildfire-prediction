@@ -55,9 +55,18 @@ def debug_info():
     source = inspect.getsource(predict_image)
     has_normalization = "/ 255.0" in source
     
+    # Check if model file exists
+    model_path = os.path.join(BASE_DIR, 'models', 'wildfire_model.h5')
+    model_exists = os.path.exists(model_path)
+    model_size = os.path.getsize(model_path) if model_exists else 0
+    
     return {
         "preprocessing_version": "v2_with_normalization" if has_normalization else "v1_without_normalization",
         "has_divide_by_255": has_normalization,
+        "model_file_exists": model_exists,
+        "model_file_path": model_path,
+        "model_size_mb": round(model_size / (1024*1024), 2) if model_exists else 0,
+        "base_dir": BASE_DIR,
         "code_snippet": source[500:800] if len(source) > 500 else source
     }
 

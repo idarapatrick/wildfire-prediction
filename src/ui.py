@@ -6,6 +6,7 @@ import io
 # Configuration
 API_URL = "https://wildfire-prediction.onrender.com/"
 
+
 st.set_page_config(page_title="Wildfire Detection System", layout="wide")
 
 st.title("Satellite Wildfire Detection System")

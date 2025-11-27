@@ -57,12 +57,16 @@ def predict_image(image_file):
     prediction_score = model.predict(img_array)[0][0]
     
     # Interpret Result (Sigmoid output: 0 to 1)
-    if prediction_score > 0.5:
+    # NOTE: Labels appear to be inverted - fixing interpretation
+    # Score close to 0 = wildfire, score close to 1 = nowildfire
+    if prediction_score < 0.5:
         result = "Wildfire Detected"
-        confidence = float(prediction_score)
+        confidence = 1.0 - float(prediction_score)
     else:
         result = "No Wildfire"
-        confidence = 1.0 - float(prediction_score)
+        confidence = float(prediction_score)
+    
+    print(f"Debug - Raw score: {prediction_score}, Prediction: {result}, Confidence: {confidence}")
         
     return {
         "prediction": result,

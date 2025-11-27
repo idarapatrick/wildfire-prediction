@@ -208,41 +208,23 @@ async def trigger_retraining(background_tasks: BackgroundTasks):
     
     def training_task():
         global training_status
-        import sys
-        from io import StringIO
-        
-        # Capture stdout to get training progress
-        old_stdout = sys.stdout
-        sys.stdout = log_capture = StringIO()
         
         try:
-            # Add initial log
-            training_status["training_logs"].append("Starting training pipeline...")
-            
-            result = run_training()
-            
-            # Get captured output
-            captured = log_capture.getvalue()
-            
-            # Parse epoch information from captured output
-            for line in captured.split('\n'):
-                if line.strip() and any(keyword in line.lower() for keyword in ['epoch', 'loss', 'accuracy', 'phase', 'evaluating', 'performance']):
-                    training_status["training_logs"].append(line.strip())
+            # Pass the training_status dict to run_training so it can update logs in real-time
+            result = run_training(status_dict=training_status)
             
             training_status["is_training"] = False
             training_status["last_training_time"] = datetime.now().isoformat()
             training_status["last_training_result"] = "success"
             training_status["last_training_message"] = result
-            training_status["training_logs"].append(f"{result}")
+            training_status["training_logs"].append(f"\n✅ {result}")
             
         except Exception as e:
             training_status["is_training"] = False
             training_status["last_training_time"] = datetime.now().isoformat()
             training_status["last_training_result"] = "error"
             training_status["last_training_message"] = f"Training failed: {str(e)}"
-            training_status["training_logs"].append(f"Error: {str(e)}")
-        finally:
-            sys.stdout = old_stdout
+            training_status["training_logs"].append(f"\n❌ Error: {str(e)}")
     
     background_tasks.add_task(training_task)
     return {"message": "Retraining started in background. Use /training_status to check progress."}
